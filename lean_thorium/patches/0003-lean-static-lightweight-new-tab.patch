@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Lean Thorium Team <lean-thorium@local>
+Date: Wed, 23 Sep 2026 15:25:00 +0000
+Subject: [PATCH 3/6] Lean Thorium: Serve static local zero-network New Tab Page with personal quick-links
+
+---
+ chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc | 28 ++++++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
+
+diff --git a/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc b/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc
+index f6a7b8c..a9b0c1d 100644
+--- a/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc
++++ b/chrome/browser/ui/webui/new_tab_page/new_tab_page_ui.cc
+@@ -85,6 +85,34 @@ NewTabPageUI::NewTabPageUI(content::WebUI* web_ui)
+   // Lean Thorium: Use embedded static NTP HTML resource without external remote scripts or telemetry
+   // Serves embedded search bar + quick link shortcuts (YouTube, Reddit, X, Facebook, Instagram, Gmail, GitHub).
++  content::WebUIDataSource* source = content::WebUIDataSource::CreateAndAdd(
++      Profile::FromWebUI(web_ui), chrome::kChromeUINewTabPageHost);
++  
++  source->AddResourcePath("new_tab_page.html", IDR_LEAN_THORIUM_STATIC_NTP_HTML);
++  source->SetDefaultResource(IDR_LEAN_THORIUM_STATIC_NTP_HTML);
++  source->DisableTrustedTypesCSP();
+ }
+-- 
+2.55.0.windows.2

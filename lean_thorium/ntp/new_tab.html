@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Tab</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card-bg: #1a1d27;
+      --card-hover: #242938;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .container {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo span {
+      color: var(--accent);
+    }
+    .search-form {
+      width: 100%;
+      position: relative;
+    }
+    .search-input {
+      width: 100%;
+      padding: 16px 20px;
+      font-size: 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+    }
+    .shortcuts-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      width: 100%;
+    }
+    @media (max-width: 600px) {
+      .shortcuts-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .shortcut-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.2s, transform 0.15s, border-color 0.2s;
+    }
+    .shortcut-card:hover {
+      background: var(--card-hover);
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .shortcut-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .shortcut-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+    .shortcut-card:hover .shortcut-label {
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">Lean <span>Thorium</span></div>
+    
+    <form class="search-form" action="https://www.google.com/search" method="get">
+      <input type="text" name="q" class="search-input" placeholder="Search the web or type a URL..." autofocus autocomplete="off">
+    </form>
+
+    <div class="shortcuts-grid">
+      <a class="shortcut-card" href="https://www.youtube.com">
+        <div class="shortcut-icon" style="color: #ff0000;">▶</div>
+        <div class="shortcut-label">YouTube</div>
+      </a>
+      <a class="shortcut-card" href="https://www.reddit.com">
+        <div class="shortcut-icon" style="color: #ff4500;">●</div>
+        <div class="shortcut-label">Reddit</div>
+      </a>
+      <a class="shortcut-card" href="https://x.com">
+        <div class="shortcut-icon" style="color: #ffffff;">𝕏</div>
+        <div class="shortcut-label">X</div>
+      </a>
+      <a class="shortcut-card" href="https://www.facebook.com">
+        <div class="shortcut-icon" style="color: #1877f2;">f</div>
+        <div class="shortcut-label">Facebook</div>
+      </a>
+      <a class="shortcut-card" href="https://www.instagram.com">
+        <div class="shortcut-icon" style="color: #e4405f;">📷</div>
+        <div class="shortcut-label">Instagram</div>
+      </a>
+      <a class="shortcut-card" href="https://mail.google.com">
+        <div class="shortcut-icon" style="color: #ea4335;">✉</div>
+        <div class="shortcut-label">Gmail</div>
+      </a>
+      <a class="shortcut-card" href="https://github.com">
+        <div class="shortcut-icon" style="color: #ffffff;">🐙</div>
+        <div class="shortcut-label">GitHub</div>
+      </a>
+      <a class="shortcut-card" href="https://maps.google.com">
+        <div class="shortcut-icon" style="color: #34a853;">🗺</div>
+        <div class="shortcut-label">Maps</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

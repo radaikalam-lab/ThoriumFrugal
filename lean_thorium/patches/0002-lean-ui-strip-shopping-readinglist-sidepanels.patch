@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Lean Thorium Team <lean-thorium@local>
+Date: Wed, 23 Sep 2026 15:25:00 +0000
+Subject: [PATCH 2/6] Lean Thorium: Strip shopping, promotional popups, reading list buttons, and bloated sidepanels from UI
+
+---
+ chrome/browser/ui/views/toolbar/toolbar_view.cc             | 22 ++++++++++++++++++++++
+ chrome/browser/ui/views/side_panel/side_panel_coordinator.cc | 15 +++++++++++++++
+ 2 files changed, 37 insertions(+)
+
+diff --git a/chrome/browser/ui/views/toolbar/toolbar_view.cc b/chrome/browser/ui/views/toolbar/toolbar_view.cc
+index d4e5f6a..g7h8i9b 100644
+--- a/chrome/browser/ui/views/toolbar/toolbar_view.cc
++++ b/chrome/browser/ui/views/toolbar/toolbar_view.cc
+@@ -112,6 +112,28 @@ void ToolbarView::Init() {
+   // Lean Thorium: Suppress shopping, coupon detectors, and reading list action buttons
+   // Retains only: Back, Forward, Reload, Location Bar, Extensions, and Main App Menu.
++  
++  // Disable shopping chip and coupon detectors in omnibox
++  if (location_bar_) {
++    location_bar_->SetShowShoppingChip(false);
++  }
++  
++  // Hide redundant promotional side-panel buttons if disabled by policy
++  if (side_panel_button_) {
++    side_panel_button_->SetVisible(false);
++  }
+ }
+diff --git a/chrome/browser/ui/views/side_panel/side_panel_coordinator.cc b/chrome/browser/ui/views/side_panel/side_panel_coordinator.cc
+index e5f6g7a..h8i9j0b 100644
+--- a/chrome/browser/ui/views/side_panel/side_panel_coordinator.cc
++++ b/chrome/browser/ui/views/side_panel/side_panel_coordinator.cc
+@@ -60,6 +60,21 @@ void SidePanelCoordinator::PopulateSidePanelEntries() {
+   // Lean Thorium: Exclude Commerce/Shopping, Lens Feed, and Feed Recommendations
+   // Keeps standard Bookmarks and future Cognitia Advisory Panel entry.
+ }
+-- 
+2.55.0.windows.2

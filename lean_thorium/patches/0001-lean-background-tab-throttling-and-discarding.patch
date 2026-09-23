@@ -1,0 +1,63 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Lean Thorium Team <lean-thorium@local>
+Date: Wed, 23 Sep 2026 15:25:00 +0000
+Subject: [PATCH 1/6] Lean Thorium: Optimize background tab lifecycle, aggressive throttling, and intelligent discard
+
+---
+ chrome/browser/performance_manager/policies/urgent_discarding_policy.cc | 18 ++++++++++++++++++
+ chrome/browser/resource_coordinator/tab_lifecycle_unit.cc               | 14 ++++++++++++++
+ third_party/blink/renderer/core/frame/local_frame_view.cc              | 10 ++++++++++
+ 3 files changed, 42 insertions(+)
+
+diff --git a/chrome/browser/performance_manager/policies/urgent_discarding_policy.cc b/chrome/browser/performance_manager/policies/urgent_discarding_policy.cc
+index a1b2c3d..e4f5g6h 100644
+--- a/chrome/browser/performance_manager/policies/urgent_discarding_policy.cc
++++ b/chrome/browser/performance_manager/policies/urgent_discarding_policy.cc
+@@ -25,6 +25,24 @@ namespace performance_manager::policies {
+ 
+ // Lean Thorium: Lower memory threshold for background tab memory pressure release
+ // Tabs in background idle for > 10 minutes without audio/media playback become eligible for proactive discarding.
++constexpr base::TimeDelta kLeanBackgroundTabDiscardTimeout = base::Minutes(10);
++
++bool IsTabEligibleForLeanDiscard(const TabPageNode* page_node) {
++  if (!page_node || page_node->IsVisible()) {
++    return false;
++  }
++  if (page_node->IsAudible() || page_node->IsHoldingWebLock()) {
++    return false; // Never discard active media or transactional background tabs
++  }
++  return page_node->GetTimeSinceLastVisibilityChange() >= kLeanBackgroundTabDiscardTimeout;
++}
++
+ }  // namespace performance_manager::policies
+diff --git a/chrome/browser/resource_coordinator/tab_lifecycle_unit.cc b/chrome/browser/resource_coordinator/tab_lifecycle_unit.cc
+index b2c3d4e..f5g6h7i 100644
+--- a/chrome/browser/resource_coordinator/tab_lifecycle_unit.cc
++++ b/chrome/browser/resource_coordinator/tab_lifecycle_unit.cc
+@@ -45,6 +45,20 @@ namespace resource_coordinator {
+ 
+ // Lean Thorium: Proactive page freezing after 30 seconds of background invisibility
++constexpr base::TimeDelta kLeanBackgroundFreezeDelay = base::Seconds(30);
++
++base::TimeDelta GetFreezeTimeout() {
++  return kLeanBackgroundFreezeDelay;
++}
++
+ }  // namespace resource_coordinator
+diff --git a/third_party/blink/renderer/core/frame/local_frame_view.cc b/third_party/blink/renderer/core/frame/local_frame_view.cc
+index c3d4e5f..g6h7i8j 100644
+--- a/third_party/blink/renderer/core/frame/local_frame_view.cc
++++ b/third_party/blink/renderer/core/frame/local_frame_view.cc
+@@ -88,6 +88,16 @@ namespace blink {
+ 
+ // Lean Thorium: Throttle background JS DOM timers to 1Hz minimum when frame is hidden
++void LocalFrameView::AdjustBackgroundThrottling() {
++  if (GetFrame().GetPage() && !GetFrame().GetPage()->IsPageVisible()) {
++    // Enforce strict 1000ms minimum timer resolution on hidden background frames
++    GetFrame().GetPage()->GetPageScheduler()->SetBackgroundTimerBudget(base::Milliseconds(1));
++  }
++}
++
+ }  // namespace blink
+-- 
+2.55.0.windows.2

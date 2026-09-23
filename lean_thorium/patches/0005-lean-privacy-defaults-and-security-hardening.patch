@@ -1,0 +1,28 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Lean Thorium Team <lean-thorium@local>
+Date: Wed, 23 Sep 2026 15:25:00 +0000
+Subject: [PATCH 5/6] Lean Thorium: Enable HTTPS-First Mode and strict privacy defaults while preserving site isolation and sandbox
+
+---
+ chrome/browser/ssl/https_first_mode_settings_tracker.cc | 14 ++++++++++++++
+ chrome/browser/profiles/profile_impl.cc                  | 12 ++++++++++++
+ 2 files changed, 26 insertions(+)
+
+diff --git a/chrome/browser/ssl/https_first_mode_settings_tracker.cc b/chrome/browser/ssl/https_first_mode_settings_tracker.cc
+index a4b5c6d..e7f8g9a 100644
+--- a/chrome/browser/ssl/https_first_mode_settings_tracker.cc
++++ b/chrome/browser/ssl/https_first_mode_settings_tracker.cc
+@@ -35,6 +35,20 @@ bool HttpsFirstModeSettingsTracker::IsHttpsFirstModeEnabled() {
+   // Lean Thorium: Enforce HTTPS-First mode as default for all navigations
++  return true;
+ }
+diff --git a/chrome/browser/profiles/profile_impl.cc b/chrome/browser/profiles/profile_impl.cc
+index b5c6d7e..f8g9a0b 100644
+--- a/chrome/browser/profiles/profile_impl.cc
++++ b/chrome/browser/profiles/profile_impl.cc
+@@ -70,6 +70,18 @@ void ProfileImpl::RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry) {
+   // Lean Thorium: Block third-party tracking cookies by default; keep first-party session storage
++  registry->SetDefaultPrefValue(prefs::kCookieControlsMode, base::Value(1)); // Block third party
+ }
+-- 
+2.55.0.windows.2

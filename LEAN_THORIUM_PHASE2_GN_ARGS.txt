@@ -1,0 +1,59 @@
+# Lean Thorium Phase 2 Validation - Exact GN Build Arguments
+# Target: Windows 11 x64 Release Build (AVX2 + AES)
+# Tag: 138.0.7204.306
+
+target_os = "win"
+target_cpu = "x64"
+is_official_build = true
+is_debug = false
+is_component_build = false
+symbol_level = 0
+use_thin_lto = true
+thin_lto_enable_optimizations = true
+
+# CPU Optimization
+use_lld = true
+optimize_webui = true
+v8_enable_builtins_optimization = true
+
+# Media, GPU & Hardware Acceleration
+proprietary_codecs = true
+ffmpeg_branding = "Chrome"
+enable_hevc_parser_and_hw_decoder = true
+enable_platform_hevc = true
+enable_platform_ac3_eac3_audio = true
+enable_platform_dolby_vision = true
+enable_platform_dts_audio = true
+enable_mse_mpeg2ts_stream_parser = true
+enable_hls_demuxer = true
+media_use_ffmpeg = true
+media_use_libvpx = true
+enable_widevine = true
+enable_cdm_host_verification = false
+
+# Networking & Modern Web Standards
+enable_websockets = true
+enable_webrtc = true
+
+# Subsystem Pruning (Lean Contract)
+enable_remoting = false
+enable_reporting = false
+enable_hangout_services_extension = false
+enable_service_discovery = false
+enable_mdns = false
+enable_nacl = false
+enable_paint_preview = false
+enable_feed_v2 = false
+enable_vr = false
+enable_ar = false
+enable_gvr_services = false
+google_api_key = ""
+google_default_client_id = ""
+google_default_client_secret = ""
+
+# Privacy & UI Hardening
+enable_reading_list = false
+enable_supervised_users = false
+
+# PGO Profile Path
+pgo_data_path = ""
