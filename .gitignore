@@ -1,0 +1,18 @@
+# Lean Thorium Root Repository .gitignore
+# Prevents large Chromium source and build artifacts from entering git
+
+/chromium/
+/depot_tools/
+/out/
+*.exe
+*.zip
+*.7z
+*.tar
+*.tar.gz
+*.pdb
+*.obj
+*.lib
+*.dll
+.gclient
+.gclient_entries
+.gclient_previous_sync_commits

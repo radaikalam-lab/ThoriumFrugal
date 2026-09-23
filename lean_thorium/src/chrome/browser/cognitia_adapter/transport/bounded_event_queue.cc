@@ -10,11 +10,22 @@ BoundedEventQueue::~BoundedEventQueue() = default;
 void BoundedEventQueue::Enqueue(std::string payload) {
   base::AutoLock auto_lock(lock_);
   if (queue_.size() >= max_capacity_) {
-    // Drop the oldest event to enforce bounded memory constraint
     queue_.pop_front();
     dropped_count_++;
   }
   queue_.push_back(std::move(payload));
+}
+
+bool BoundedEventQueue::EnqueueContentWithPolicy(std::string payload, bool is_connected) {
+  if (!is_connected) {
+    // Phase 3B Privacy Constraint: Never buffer content-bearing payloads when Cognitia is absent
+    base::AutoLock auto_lock(lock_);
+    dropped_count_++;
+    return false; // Dropped immediately
+  }
+
+  Enqueue(std::move(payload));
+  return true;
 }
 
 bool BoundedEventQueue::Dequeue(std::string* out_payload) {
