@@ -5,37 +5,25 @@
 #include <memory>
 #include "base/time/time.h"
 #include "base/values.h"
+#include "chrome/browser/cognitia_adapter/protocol/observation_envelope.h"
+#include "chrome/browser/cognitia_adapter/protocol/content_envelope.h"
 
 namespace cognitia {
 
-// Read-only observation envelope describing browser events for external advisory intelligence.
-// Epistemic invariant: This data structure is strictly read-only and conveys zero authority.
-struct ObservationEnvelope {
-  std::string envelope_version = "1.0";
-  base::Time timestamp;
-  std::string observation_type; // e.g., "PAGE_COMMITTED", "TAB_ACTIVATED", "SELECTION_CHANGED"
-  int window_id = 0;
-  int tab_id = 0;
-  bool is_active_tab = false;
-  std::string url;
-  std::string title;
-  int http_status = 200;
-  std::string selected_text;
-  bool is_incognito = false;
-
-  base::Value::Dict ToValueDict() const;
-};
-
-// Interface boundary for future Cognitia advisory connection.
-// No active LLM or agent dependency is bundled into Lean Thorium.
+// Interface boundary for Cognitia observation and advisory connection.
+// Epistemic invariant: Cognitia possesses ZERO browser-control or command execution authority.
 class CognitiaAdapterBoundary {
  public:
   virtual ~CognitiaAdapterBoundary() = default;
 
-  // Emits an asynchronous, non-blocking observation event to the IPC channel
+  // Emits an asynchronous, non-blocking observation event to the local IPC channel
   virtual void EmitObservation(const ObservationEnvelope& envelope) = 0;
 
+  // Emits an explicit user-authorized content extraction event
+  virtual void EmitAuthorizedContent(const ContentEnvelope& envelope) = 0;
+
   // Receives candidate advisory suggestions for presentation to the user authority layer
+  // Invariant: Proposals are advisory; human authorization is required before any action.
   virtual void HandleAdvisoryProposal(base::Value::Dict proposal) = 0;
 };
 

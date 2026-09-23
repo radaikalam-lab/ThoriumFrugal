@@ -42,16 +42,17 @@ base::Value::Dict ContentEnvelope::ToValueDict() const {
   root.Set("schema_version", schema_version_);
   root.Set("created_at", created_at_);
   root.Set("source_id", "thorium_browser_adapter");
+  root.Set("metadata", base::Value::Dict());
 
-  // User authorization block
+  base::Value::Dict payload;
+
+  // Explicit user authorization metadata
   base::Value::Dict auth;
   auth.Set("mode", ContentExtractionModeToString(mode_));
   auth.Set("user_initiated", true);
   auth.Set("timestamp_utc", created_at_);
   auth.Set("scope", mode_ == ContentExtractionMode::kSelectedText ? "selection" : "page");
-  root.Set("content_authorization", std::move(auth));
-
-  base::Value::Dict payload;
+  payload.Set("content_authorization", std::move(auth));
 
   // Browser Identity
   base::Value::Dict browser;
@@ -68,7 +69,7 @@ base::Value::Dict ContentEnvelope::ToValueDict() const {
   page.Set("tab_id", tab_id_);
   payload.Set("page", std::move(page));
 
-  // Content Payload - Tagged explicitly as UNTRUSTED DATA
+  // Content Payload - Tagged explicitly as UNTRUSTED DATA (WEB CONTENT != INSTRUCTION)
   base::Value::Dict content;
   content.Set("type", "untrusted_web_content");
   content.Set("text", extracted_text_);
@@ -76,7 +77,7 @@ base::Value::Dict ContentEnvelope::ToValueDict() const {
   content.Set("is_truncated", is_truncated_);
   payload.Set("content", std::move(content));
 
-  // Provenance metadata
+  // Provenance metadata adhering to Cognitia ABI
   base::Value::Dict provenance;
   provenance.Set("source_type", "sensor");
   provenance.Set("producer_id", "thorium_browser_adapter");

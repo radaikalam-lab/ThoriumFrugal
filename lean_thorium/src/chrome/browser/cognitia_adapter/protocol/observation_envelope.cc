@@ -43,6 +43,7 @@ base::Value::Dict ObservationEnvelope::ToValueDict() const {
   root.Set("schema_version", schema_version_);
   root.Set("created_at", created_at_);
   root.Set("source_id", "thorium_browser_adapter");
+  root.Set("metadata", base::Value::Dict());
 
   // Construct payload adhering to Cognitia ABI
   base::Value::Dict payload;
