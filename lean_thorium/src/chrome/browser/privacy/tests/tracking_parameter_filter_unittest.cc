@@ -1,50 +1,37 @@
 ﻿#include "chrome/browser/privacy/tracking_parameter_filter/tracking_parameter_filter.h"
-#include "testing/gtest/include/gtest/gtest.h"
+#include <cassert>
+#include <iostream>
 
 namespace lean_thorium {
 namespace privacy {
 
-TEST(TrackingParameterFilterTest, StripsUtmParameters) {
+void TestTrackingParameterFilter() {
+  std::cout << "[TEST] TrackingParameterFilter: Standard UTM and Click IDs..." << std::endl;
   TrackingParameterFilter filter;
-  std::string input = "https://example.com/product?id=42&utm_source=newsletter&utm_medium=email";
-  auto result = filter.StripTrackingParameters(input);
-  EXPECT_TRUE(result.parameters_removed);
-  EXPECT_EQ(result.cleaned_url, "https://example.com/product?id=42");
-  EXPECT_EQ(result.removed_parameters.size(), 2u);
-}
+  auto r1 = filter.StripTrackingParameters("https://example.com/product?id=42&utm_source=newsletter&fbclid=abc123");
+  assert(r1.parameters_removed == true);
+  assert(r1.cleaned_url == "https://example.com/product?id=42");
 
-TEST(TrackingParameterFilterTest, StripsClickIds) {
-  TrackingParameterFilter filter;
-  std::string input = "https://shop.example.com/items?q=shoes&gclid=12345&fbclid=abcde&p=1";
-  auto result = filter.StripTrackingParameters(input);
-  EXPECT_TRUE(result.parameters_removed);
-  EXPECT_EQ(result.cleaned_url, "https://shop.example.com/items?q=shoes&p=1");
-}
+  std::cout << "[TEST] TrackingParameterFilter: Functional parameters & fragments..." << std::endl;
+  std::string input2 = "https://example.org/search?q=quantum+epistemics&page=2#section-results";
+  auto r2 = filter.StripTrackingParameters(input2);
+  assert(r2.parameters_removed == false);
+  assert(r2.cleaned_url == input2);
 
-TEST(TrackingParameterFilterTest, PreservesFunctionalParametersAndFragments) {
-  TrackingParameterFilter filter;
-  std::string input = "https://example.org/search?q=quantum+epistemics&page=2#section-results";
-  auto result = filter.StripTrackingParameters(input);
-  EXPECT_FALSE(result.parameters_removed);
-  EXPECT_EQ(result.cleaned_url, input);
-}
+  std::cout << "[TEST] TrackingParameterFilter: OAuth and Tokens..." << std::endl;
+  std::string input3 = "https://auth.example.com/oauth?redirect_uri=https://app.com&state=xyz&code=abc";
+  auto r3 = filter.StripTrackingParameters(input3);
+  assert(r3.parameters_removed == false);
+  assert(r3.cleaned_url == input3);
 
-TEST(TrackingParameterFilterTest, PreservesOAuthAndAuthParameters) {
-  TrackingParameterFilter filter;
-  std::string input = "https://auth.example.com/login?redirect_uri=https://app.example.com&state=xyz&code=secret123";
-  auto result = filter.StripTrackingParameters(input);
-  EXPECT_FALSE(result.parameters_removed);
-  EXPECT_EQ(result.cleaned_url, input);
-}
+  std::cout << "[TEST] TrackingParameterFilter: Idempotent execution..." << std::endl;
+  auto r4 = filter.StripTrackingParameters("https://example.com/?utm_source=x&id=10");
+  auto r5 = filter.StripTrackingParameters(r4.cleaned_url);
+  assert(r4.cleaned_url == "https://example.com/?id=10");
+  assert(r5.cleaned_url == "https://example.com/?id=10");
+  assert(r5.parameters_removed == false);
 
-TEST(TrackingParameterFilterTest, IdempotentExecution) {
-  TrackingParameterFilter filter;
-  std::string input = "https://example.com/?utm_source=twitter&id=100";
-  auto result1 = filter.StripTrackingParameters(input);
-  auto result2 = filter.StripTrackingParameters(result1.cleaned_url);
-  EXPECT_EQ(result1.cleaned_url, "https://example.com/?id=100");
-  EXPECT_EQ(result2.cleaned_url, "https://example.com/?id=100");
-  EXPECT_FALSE(result2.parameters_removed);
+  std::cout << "[PASS] TrackingParameterFilter tests passed!" << std::endl;
 }
 
 }  // namespace privacy

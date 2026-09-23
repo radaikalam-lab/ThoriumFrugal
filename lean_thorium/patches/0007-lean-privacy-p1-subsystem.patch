@@ -5,13 +5,13 @@ Integrates the Privacy P1 local deterministic subsystem into Lean Thorium.
 Provides tracker blocking, query parameter sanitization, and third-party classification.
 
 ---
- chrome/browser/BUILD.gn | 26 ++++++++++++++++++++++++++
- 1 file changed, 26 insertions(+)
+ chrome/browser/BUILD.gn | 30 ++++++++++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
 
 diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
 --- a/chrome/browser/BUILD.gn
 +++ b/chrome/browser/BUILD.gn
-@@ -3500,6 +3500,32 @@ static_library("browser") {
+@@ -3500,6 +3500,36 @@ static_library("browser") {
 +    "privacy/privacy_policy/privacy_types.h",
 +    "privacy/privacy_policy/site_exceptions.h",
 +    "privacy/privacy_policy/privacy_policy_manager.h",
@@ -29,6 +29,10 @@ diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
 +    "privacy/privacy_events/privacy_event.h",
 +    "privacy/privacy_events/privacy_event_dispatcher.h",
 +    "privacy/privacy_events/privacy_event_dispatcher.cc",
++    "privacy/throttle/lean_privacy_url_loader_throttle.h",
++    "privacy/throttle/lean_privacy_url_loader_throttle.cc",
++    "privacy/throttle/lean_privacy_navigation_throttle.h",
++    "privacy/throttle/lean_privacy_navigation_throttle.cc",
    ]
  
    deps += [

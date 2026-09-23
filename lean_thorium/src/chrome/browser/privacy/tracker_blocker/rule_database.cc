@@ -16,23 +16,47 @@ std::string ToLower(std::string str) {
 
 }  // namespace
 
+std::vector<std::string> RuleDatabase::GenerateCandidateDomains(const std::string& host) {
+  std::vector<std::string> candidates;
+  std::string lower_host = ToLower(host);
+  if (lower_host.empty()) return candidates;
+
+  // Strip trailing dot if present
+  if (lower_host.back() == '.') {
+    lower_host.pop_back();
+  }
+
+  candidates.push_back(lower_host);
+  size_t dot_pos = lower_host.find('.');
+  while (dot_pos != std::string::npos && dot_pos + 1 < lower_host.length()) {
+    std::string parent = lower_host.substr(dot_pos + 1);
+    if (!parent.empty()) {
+      candidates.push_back(parent);
+    }
+    dot_pos = lower_host.find('.', dot_pos + 1);
+  }
+
+  return candidates;
+}
+
 bool RuleDatabase::AddRule(const ParsedRule& rule) {
   if (!rule.is_valid) return false;
 
   std::lock_guard<std::mutex> lock(mutex_);
   if (total_rules_ >= 50000) {
-    return false;  // Memory bound protection
+    return false;  // Bounded memory protection
   }
 
+  std::string domain_key = ToLower(rule.domain_pattern);
   if (rule.rule_type == RuleType::kAllow) {
-    if (!rule.domain_pattern.empty()) {
-      allow_rules_by_domain_[rule.domain_pattern].push_back(rule);
+    if (!domain_key.empty()) {
+      allow_rules_by_domain_[domain_key].push_back(rule);
     } else {
       generic_allow_rules_.push_back(rule);
     }
   } else {
-    if (!rule.domain_pattern.empty()) {
-      block_rules_by_domain_[rule.domain_pattern].push_back(rule);
+    if (!domain_key.empty()) {
+      block_rules_by_domain_[domain_key].push_back(rule);
     } else {
       generic_block_rules_.push_back(rule);
     }
@@ -53,35 +77,12 @@ size_t RuleDatabase::LoadFromText(const std::string& text_content) {
   return loaded;
 }
 
-bool RuleDatabase::MatchesPattern(const ParsedRule& rule,
-                                  const std::string& host,
-                                  const std::string& path) const {
-  std::string lower_host = ToLower(host);
-  std::string lower_pattern = ToLower(rule.domain_pattern);
-
-  // Exact domain match
-  bool domain_matched = false;
-  if (lower_host == lower_pattern) {
-    domain_matched = true;
-  } else if (rule.match_subdomains) {
-    // Subdomain match (e.g., host="ad.tracker.com", pattern="tracker.com")
-    if (lower_host.length() > lower_pattern.length() + 1 &&
-        lower_host.rfind("." + lower_pattern) == (lower_host.length() - lower_pattern.length() - 1)) {
-      domain_matched = true;
-    }
-  }
-
-  if (!domain_matched) {
-    return false;
-  }
-
-  // Path prefix match
+bool RuleDatabase::MatchesPathAndOptions(const ParsedRule& rule, const std::string& path) const {
   if (!rule.path_pattern.empty()) {
     if (path.find(rule.path_pattern) == std::string::npos) {
       return false;
     }
   }
-
   return true;
 }
 
@@ -89,19 +90,27 @@ std::vector<ParsedRule> RuleDatabase::FindMatchingAllowRules(const std::string& 
                                                              const std::string& path) const {
   std::lock_guard<std::mutex> lock(mutex_);
   std::vector<ParsedRule> matches;
+  std::vector<std::string> candidates = GenerateCandidateDomains(host);
 
-  // Search domain index
-  for (const auto& pair : allow_rules_by_domain_) {
-    for (const auto& rule : pair.second) {
-      if (MatchesPattern(rule, host, path)) {
-        matches.push_back(rule);
+  // Indexed lookup: Check only buckets for exact host and parent subdomains: O(labels)
+  for (const auto& domain : candidates) {
+    auto it = allow_rules_by_domain_.find(domain);
+    if (it != allow_rules_by_domain_.end()) {
+      for (const auto& rule : it->second) {
+        // If domain is parent, match_subdomains must be true
+        if (domain != candidates[0] && !rule.match_subdomains) {
+          continue;
+        }
+        if (MatchesPathAndOptions(rule, path)) {
+          matches.push_back(rule);
+        }
       }
     }
   }
 
-  // Search generic
+  // Check generic allow rules
   for (const auto& rule : generic_allow_rules_) {
-    if (rule.path_pattern.empty() || path.find(rule.path_pattern) != std::string::npos) {
+    if (MatchesPathAndOptions(rule, path)) {
       matches.push_back(rule);
     }
   }
@@ -113,19 +122,26 @@ std::vector<ParsedRule> RuleDatabase::FindMatchingBlockRules(const std::string& 
                                                              const std::string& path) const {
   std::lock_guard<std::mutex> lock(mutex_);
   std::vector<ParsedRule> matches;
+  std::vector<std::string> candidates = GenerateCandidateDomains(host);
 
-  // Search domain index
-  for (const auto& pair : block_rules_by_domain_) {
-    for (const auto& rule : pair.second) {
-      if (MatchesPattern(rule, host, path)) {
-        matches.push_back(rule);
+  // Indexed lookup: Check only buckets for exact host and parent subdomains: O(labels)
+  for (const auto& domain : candidates) {
+    auto it = block_rules_by_domain_.find(domain);
+    if (it != block_rules_by_domain_.end()) {
+      for (const auto& rule : it->second) {
+        if (domain != candidates[0] && !rule.match_subdomains) {
+          continue;
+        }
+        if (MatchesPathAndOptions(rule, path)) {
+          matches.push_back(rule);
+        }
       }
     }
   }
 
-  // Search generic
+  // Check generic block rules
   for (const auto& rule : generic_block_rules_) {
-    if (rule.path_pattern.empty() || path.find(rule.path_pattern) != std::string::npos) {
+    if (MatchesPathAndOptions(rule, path)) {
       matches.push_back(rule);
     }
   }
@@ -135,12 +151,16 @@ std::vector<ParsedRule> RuleDatabase::FindMatchingBlockRules(const std::string& 
 
 bool RuleDatabase::IsKnownTrackerHost(const std::string& host) const {
   std::lock_guard<std::mutex> lock(mutex_);
-  std::string lower_host = ToLower(host);
-  for (const auto& pair : block_rules_by_domain_) {
-    if (lower_host == pair.first ||
-        (lower_host.length() > pair.first.length() + 1 &&
-         lower_host.rfind("." + pair.first) == (lower_host.length() - pair.first.length() - 1))) {
-      return true;
+  std::vector<std::string> candidates = GenerateCandidateDomains(host);
+
+  for (const auto& domain : candidates) {
+    auto it = block_rules_by_domain_.find(domain);
+    if (it != block_rules_by_domain_.end()) {
+      for (const auto& rule : it->second) {
+        if (domain == candidates[0] || rule.match_subdomains) {
+          return true;
+        }
+      }
     }
   }
   return false;

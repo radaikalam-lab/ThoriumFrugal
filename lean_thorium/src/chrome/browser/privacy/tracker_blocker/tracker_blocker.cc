@@ -46,12 +46,12 @@ PrivacyEvaluationResult TrackerBlocker::EvaluateRequest(const std::string& targe
     return result;
   }
 
-  // Check if host is a known tracker
+  // Check if host is an indexed known tracker host
   if (database_->IsKnownTrackerHost(host)) {
     result.classification = TrackerClassification::kKnownTracker;
   }
 
-  // 1. Evaluate Allow Rules First (Allow exceptions override block rules)
+  // 1. Evaluate Allow Rules First (Normative Precedence: Allow exceptions override block rules)
   std::vector<ParsedRule> allow_rules = database_->FindMatchingAllowRules(host, path);
   for (const auto& rule : allow_rules) {
     if (!RuleParser::MatchesResourceType(resource_type, rule.resource_type_mask)) {
@@ -65,9 +65,12 @@ PrivacyEvaluationResult TrackerBlocker::EvaluateRequest(const std::string& targe
       continue;
     }
 
-    // Match found: explicitly allowed
+    // Match found: explicitly allowed by exception
     result.decision = PrivacyDecision::kAllow;
-    result.matched_rule_id = rule.rule_id;
+    result.matched_rule.matched = true;
+    result.matched_rule.rule_id = rule.rule_id;
+    result.matched_rule.pattern = rule.original_rule_text;
+    result.matched_rule.is_allow_rule = true;
     result.reason = "Matched allow rule: " + rule.original_rule_text;
     return result;
   }
@@ -86,14 +89,21 @@ PrivacyEvaluationResult TrackerBlocker::EvaluateRequest(const std::string& targe
       continue;
     }
 
-    // Match found: Block rule applies
+    result.matched_rule.matched = true;
+    result.matched_rule.rule_id = rule.rule_id;
+    result.matched_rule.pattern = rule.original_rule_text;
+    result.matched_rule.is_allow_rule = false;
     result.classification = TrackerClassification::kKnownTracker;
+
     // Conservative P1 Policy: Known Tracker + Third Party -> BLOCK
-    // Known Tracker + First Party -> ALLOW (or configurable)
+    // Known Tracker + First Party -> ALLOW
     if (result.party_context == PartyContext::kThirdParty || !rule.require_third_party) {
       result.decision = PrivacyDecision::kBlock;
-      result.matched_rule_id = rule.rule_id;
       result.reason = "Matched block rule: " + rule.original_rule_text;
+      return result;
+    } else {
+      result.decision = PrivacyDecision::kAllow;
+      result.reason = "Matched tracker rule in first-party context (allowed by policy)";
       return result;
     }
   }

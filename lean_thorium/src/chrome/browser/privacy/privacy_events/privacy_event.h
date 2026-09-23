@@ -9,9 +9,10 @@ namespace lean_thorium {
 namespace privacy {
 
 struct PrivacyEvent {
-  std::string event_id;
+  std::string event_id;         // Robust monotonic UUID/token (e.g., lt_priv_000001)
   std::string event_type;       // e.g. "privacy.request_blocked", "privacy.tracking_parameter_removed"
-  std::string sanitized_url;    // Stripped of credentials/sensitive query params
+  std::string host;             // Target host
+  std::string sanitized_url;    // Explicitly sanitized URL (zero credentials/tokens/secrets)
   std::string initiator_origin; // Initiating top-level origin
   PartyContext party_context = PartyContext::kFirstParty;
   std::string resource_type;

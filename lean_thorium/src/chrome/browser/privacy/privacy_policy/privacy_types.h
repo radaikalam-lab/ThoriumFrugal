@@ -41,17 +41,25 @@ enum class ResourceType {
   kOther = 10,
 };
 
+// Rule match metadata (independent from tracker classification)
+struct RuleMatch {
+  bool matched = false;
+  std::string rule_id;
+  std::string pattern;
+  bool is_allow_rule = false;
+};
+
 // Result of evaluating a request against privacy policies and rule sets
 struct PrivacyEvaluationResult {
   PrivacyDecision decision = PrivacyDecision::kAllow;
   PartyContext party_context = PartyContext::kFirstParty;
   TrackerClassification classification = TrackerClassification::kNotTracker;
-  std::string matched_rule_id;
+  RuleMatch matched_rule;
   std::string reason;
   bool exception_applied = false;
 };
 
-// Helper converters for logging and telemetry
+// Helper string converters for logging and telemetry
 inline const char* PrivacyDecisionToString(PrivacyDecision decision) {
   switch (decision) {
     case PrivacyDecision::kAllow:

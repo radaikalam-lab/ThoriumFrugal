@@ -21,10 +21,10 @@ class RuleDatabase {
   // Loads rules from raw filter list text
   size_t LoadFromText(const std::string& text_content);
 
-  // Finds all matching allow rules for a host and path
+  // Finds all matching allow rules for a host and path using domain-indexed lookup
   std::vector<ParsedRule> FindMatchingAllowRules(const std::string& host, const std::string& path) const;
 
-  // Finds all matching block rules for a host and path
+  // Finds all matching block rules for a host and path using domain-indexed lookup
   std::vector<ParsedRule> FindMatchingBlockRules(const std::string& host, const std::string& path) const;
 
   // Checks if a host is directly indexed as a known tracker domain
@@ -33,8 +33,11 @@ class RuleDatabase {
   size_t RuleCount() const;
   void Clear();
 
+  // Helper to generate candidate domain labels (e.g. ads.foo.example.com -> ads.foo.example.com, foo.example.com, example.com)
+  static std::vector<std::string> GenerateCandidateDomains(const std::string& host);
+
  private:
-  bool MatchesPattern(const ParsedRule& rule, const std::string& host, const std::string& path) const;
+  bool MatchesPathAndOptions(const ParsedRule& rule, const std::string& path) const;
 
   mutable std::mutex mutex_;
   std::unordered_map<std::string, std::vector<ParsedRule>> allow_rules_by_domain_;

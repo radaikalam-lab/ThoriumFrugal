@@ -19,7 +19,7 @@ class TrackingParameterFilter {
   TrackingParameterFilter();
   ~TrackingParameterFilter() = default;
 
-  // Strips tracking parameters from the URL, preserving functional parameters and fragments
+  // Strips tracking parameters from the URL, preserving functional parameters, ordering, and fragments
   FilterResult StripTrackingParameters(const std::string& url_str) const;
 
   // Checks if a given query parameter key is a known tracking parameter
