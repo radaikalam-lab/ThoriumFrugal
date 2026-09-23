@@ -1,0 +1,36 @@
+﻿From: Lean Thorium Engineering <engineering@thorium.local>
+Subject: [PATCH 0007/0007] Lean Thorium Privacy P1 - Local Tracker Blocking & Anti-Tracking
+
+Integrates the Privacy P1 local deterministic subsystem into Lean Thorium.
+Provides tracker blocking, query parameter sanitization, and third-party classification.
+
+---
+ chrome/browser/BUILD.gn | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+diff --git a/chrome/browser/BUILD.gn b/chrome/browser/BUILD.gn
+--- a/chrome/browser/BUILD.gn
++++ b/chrome/browser/BUILD.gn
+@@ -3500,6 +3500,32 @@ static_library("browser") {
++    "privacy/privacy_policy/privacy_types.h",
++    "privacy/privacy_policy/site_exceptions.h",
++    "privacy/privacy_policy/privacy_policy_manager.h",
++    "privacy/privacy_policy/privacy_policy_manager.cc",
++    "privacy/third_party_classifier/third_party_classifier.h",
++    "privacy/third_party_classifier/third_party_classifier.cc",
++    "privacy/tracking_parameter_filter/tracking_parameter_filter.h",
++    "privacy/tracking_parameter_filter/tracking_parameter_filter.cc",
++    "privacy/tracker_blocker/rule_parser.h",
++    "privacy/tracker_blocker/rule_parser.cc",
++    "privacy/tracker_blocker/rule_database.h",
++    "privacy/tracker_blocker/rule_database.cc",
++    "privacy/tracker_blocker/tracker_blocker.h",
++    "privacy/tracker_blocker/tracker_blocker.cc",
++    "privacy/privacy_events/privacy_event.h",
++    "privacy/privacy_events/privacy_event_dispatcher.h",
++    "privacy/privacy_events/privacy_event_dispatcher.cc",
+   ]
+ 
+   deps += [
+-- 
+2.45.2.windows.1

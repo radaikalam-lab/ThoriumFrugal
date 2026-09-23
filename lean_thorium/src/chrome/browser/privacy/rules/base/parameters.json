@@ -1,0 +1,32 @@
+﻿{
+  "version": "1.0.0",
+  "parameters": [
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_term",
+    "utm_content",
+    "utm_id",
+    "utm_source_platform",
+    "utm_creative_format",
+    "utm_marketing_tactic",
+    "gclid",
+    "gbraid",
+    "wbraid",
+    "dclid",
+    "fbclid",
+    "msclkid",
+    "mc_eid",
+    "mc_cid",
+    "yclid",
+    "_openstat",
+    "igshid",
+    "twclid",
+    "mkt_tok",
+    "_hsenc",
+    "_hsmi",
+    "elqtrackid",
+    "elqaid",
+    "elqat"
+  ]
+}

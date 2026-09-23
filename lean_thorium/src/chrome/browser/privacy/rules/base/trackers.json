@@ -1,0 +1,29 @@
+﻿{
+  "version": "1.0.0",
+  "updated_at": "2026-09-23T00:00:00Z",
+  "description": "Lean Thorium Privacy P1 Reference Tracker Blocklist",
+  "rules": [
+    { "id": "blk_ga", "pattern": "||google-analytics.com^$third-party", "category": "analytics" },
+    { "id": "blk_googletag", "pattern": "||googletagmanager.com/gtag/js^$third-party", "category": "analytics" },
+    { "id": "blk_doubleclick", "pattern": "||doubleclick.net^$third-party", "category": "advertising" },
+    { "id": "blk_googlesynd", "pattern": "||googlesyndication.com^$third-party", "category": "advertising" },
+    { "id": "blk_fb_tr", "pattern": "||facebook.com/tr^$third-party", "category": "social_tracker" },
+    { "id": "blk_fb_connect", "pattern": "||connect.facebook.net/en_US/fbevents.js^$third-party", "category": "social_tracker" },
+    { "id": "blk_criteo", "pattern": "||criteo.com^$third-party", "category": "advertising" },
+    { "id": "blk_criteo_net", "pattern": "||criteo.net^$third-party", "category": "advertising" },
+    { "id": "blk_taboola", "pattern": "||taboola.com^$third-party", "category": "advertising" },
+    { "id": "blk_outbrain", "pattern": "||outbrain.com^$third-party", "category": "advertising" },
+    { "id": "blk_hotjar", "pattern": "||hotjar.com^$third-party", "category": "telemetry" },
+    { "id": "blk_scorecard", "pattern": "||scorecardresearch.com^$third-party", "category": "analytics" },
+    { "id": "blk_yandex_metrika", "pattern": "||mc.yandex.ru/metrika/watch.js^$third-party", "category": "analytics" },
+    { "id": "blk_chartbeat", "pattern": "||chartbeat.com^$third-party", "category": "analytics" },
+    { "id": "blk_optimizely", "pattern": "||optimizely.com^$third-party", "category": "analytics" },
+    { "id": "blk_appsflyer", "pattern": "||appsflyer.com^$third-party", "category": "analytics" },
+    { "id": "blk_branch", "pattern": "||branch.io^$third-party", "category": "analytics" },
+    { "id": "alw_cdnjs", "pattern": "@@||cdnjs.cloudflare.com^", "category": "cdn_allow" },
+    { "id": "alw_jsdelivr", "pattern": "@@||cdn.jsdelivr.net^", "category": "cdn_allow" },
+    { "id": "alw_unpkg", "pattern": "@@||unpkg.com^", "category": "cdn_allow" },
+    { "id": "alw_gfonts", "pattern": "@@||fonts.googleapis.com^", "category": "fonts_allow" },
+    { "id": "alw_gstatic", "pattern": "@@||fonts.gstatic.com^", "category": "fonts_allow" }
+  ]
+}

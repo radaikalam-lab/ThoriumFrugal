@@ -1,0 +1,10 @@
+﻿{
+  "version": "1.0.0",
+  "site_exceptions": [
+    {
+      "domain": "internal.trusted-corp.example",
+      "policy": "allow_all",
+      "reason": "Internal ERP integration testing"
+    }
+  ]
+}
